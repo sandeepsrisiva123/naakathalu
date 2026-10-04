@@ -78,12 +78,15 @@ h2{font-size:22px;letter-spacing:-.5px}
 <p>కొందరు కథల కోసం ఎక్కడెక్కడికో వెళ్తారు. సందీప్ మాత్రం కథలను తన ఇంటి గడప దగ్గరే కనుగొన్నాడు — తెల్లవారుజామున వేసే ముగ్గులో, వేపచెట్టు నీడలో, కాఫీ కప్పు కోసం జరిగే చిన్న చిన్న గొడవల్లో.</p>
 <p>ఆయన కలం గంభీరమైన మాటలు చెప్పదు. అమ్మమ్మ గొంతులా మెత్తగా, తాతయ్య నవ్వులా నిష్కపటంగా మాట్లాడుతుంది. జీవితంలోని అతి పెద్ద కథలన్నీ అతి చిన్న క్షణాల్లోనే దాగి ఉంటాయని ఆయనకు తెలుసు.</p>
 <p>పల్లెటూరి మట్టివాసన, పాత పెంకుటిల్లు, ఒకరి చేతిలో ఒకరి చేయి — ఇవే ఆయన కథల ప్రాణం. సందీప్ రాసేది కేవలం కథలు కాదు; మనం మర్చిపోతున్న మనసారా నవ్వులను, పాత జ్ఞాపకాలను మళ్ళీ మన చేతిలో పెట్టే ఆప్యాయత.</p></div></div><button class="btn" id="bk2" style="display:block;margin:28px auto 0">← పుస్తకాల వద్దకు</button></section></div>
-<div id="adminView" hidden><div class="adm"><h2>📤 PDF అప్‌లోడ్ చేసి ఫ్లిప్‌బుక్ చేయండి</h2>
-<label>పుస్తకం పేరు</label><input class="fld" id="ut" placeholder="ఉదా: మన ఇంటి గడప">
+<div id="adminView" hidden><div class="adm"><h2>📤 PDF అప్‌లోడ్ → ఫ్లిప్‌బుక్ (GitHub లో సేవ్ అవుతుంది)</h2>
+<details id="gs"><summary style="cursor:pointer;font-weight:600">⚙️ GitHub settings (ఒక్కసారి)</summary>
+<label>GitHub username</label><input class="fld" id="go"><label>Repository name</label><input class="fld" id="gr"><label>Branch</label><input class="fld" id="gb" value="main">
+<label>Access token (Contents: Read &amp; write)</label><input class="fld" id="gt" type="password" placeholder="github_pat_…"><button class="gh" id="gsv">Save settings</button></details>
+<label style="display:block;margin-top:16px">పుస్తకం పేరు</label><input class="fld" id="ut" placeholder="ఉదా: మన ఇంటి గడప">
 <label>ఉపశీర్షిక (ఐచ్ఛికం)</label><input class="fld" id="us">
 <label>PDF ఫైల్</label><input class="fld" id="uf" type="file" accept="application/pdf">
-<button class="btn" id="ub">ఫ్లిప్‌బుక్‌గా మార్చు</button> <button class="gh" id="lo">Logout</button>
-<p id="um" class="err" style="color:var(--mut)"></p><h2 style="margin-top:28px">అప్‌లోడ్ చేసిన పుస్తకాలు</h2><div id="ul"></div></div></div>
+<button class="btn" id="ub">ఫ్లిప్‌బుక్‌గా మార్చి GitHub లో సేవ్ చేయి</button> <button class="gh" id="lo">Logout</button>
+<p id="um" class="err" style="color:var(--mut)"></p><h2 style="margin-top:28px">GitHub లోని పుస్తకాలు</h2><div id="ul"></div></div></div>
 <div id="lg" class="mod" hidden><div class="mc"><h2>🔐 Admin Login</h2><input id="lu" placeholder="Username" autocomplete="username"><input id="lp" type="password" placeholder="Password" autocomplete="current-password"><div class="err" id="le"></div><button class="btn" id="lb">Login</button> <button class="gh" id="lc">Cancel</button></div></div>
 <div id="ov"><div id="top"><span id="bt"></span><button class="ib" id="cl">✕ Close</button></div>
 <div id="stage"><div id="book"></div></div>
@@ -123,31 +126,47 @@ $('cl').onclick=closeBook;$('pv').onclick=()=>pf&&pf.flipPrev();$('nx').onclick=
 $('fs').onclick=()=>{document.fullscreenElement?document.exitFullscreen():$('ov').requestFullscreen&&$('ov').requestFullscreen()};
 addEventListener('keydown',e=>{if(!pf)return;if(e.key==='ArrowRight')pf.flipNext();if(e.key==='ArrowLeft')pf.flipPrev();if(e.key==='Escape')closeBook()});
 
-/* ---- Admin: login + PDF upload (runs fully in the browser) ---- */
+/* ---- Admin: login + PDF upload, saved into the GitHub repo via the GitHub API ---- */
 const USER='admin',HASH='ca0937f4826e30f54fa213fedff79d06169df428be0fa46cae12a3ad8a3a1024';
 const ok=()=>{try{return sessionStorage.getItem('adm')==='1'}catch(e){return false}};
 const sha=async t=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode('naa-kathalu|'+t)))].map(x=>x.toString(16).padStart(2,'0')).join('');
-const idb=()=>new Promise((res,rej)=>{const r=indexedDB.open('naa-kathalu',1);r.onupgradeneeded=()=>r.result.createObjectStore('b',{keyPath:'id'});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
-const tx=async(m,f)=>{const d=await idb();return new Promise((res,rej)=>{const t=d.transaction('b',m),q=f(t.objectStore('b'));t.oncomplete=()=>res(q&&q.result);t.onerror=()=>rej(t.error)})};
-const ST=()=>tx('readonly',o=>o.getAll()).catch(()=>[]);
-async function load(){const a=await ST();BOOKS.splice(BASE);a.sort((x,y)=>x.id-y.id).forEach(b=>BOOKS.push(b));draw()}
 const BASE=BOOKS.length;
-async function list(){const a=await ST(),u=$('ul');u.innerHTML=a.length?'':'<p style="color:var(--mut)">ఇంకా ఏవీ లేవు.</p>';
-a.forEach(b=>{const r=document.createElement('div');r.className='row';const t=document.createElement('span');t.textContent=b.title+' ('+b.pages.length+' pages)';const d=document.createElement('button');d.className='sm';d.textContent='Delete';d.onclick=async()=>{if(confirm('Delete "'+b.title+'"?')){await tx('readwrite',o=>o.delete(b.id));await load();list()}};r.append(t,d);u.appendChild(r)})}
-$('nu').onclick=()=>ok()?show('u'):($('lg').hidden=false,$('lu').focus());
+async function load(){try{const r=await fetch('books/books.json?'+Date.now());if(r.ok){const a=await r.json();BOOKS.splice(BASE);a.forEach(b=>BOOKS.push(b))}}catch(e){}draw()}
+const cfg=()=>{try{return JSON.parse(localStorage.getItem('ghcfg')||'{}')}catch(e){return{}}};
+function fill(){const c=cfg(),h=location.hostname,p=location.pathname.split('/')[1];
+$('go').value=c.o||'sandeepsrisiva123';$('gr').value=c.r||'naakathalu';$('gb').value=c.b||'main';$('gt').value=c.t||'';
+$('gs').open=!c.t}
+$('gsv').onclick=()=>{try{localStorage.setItem('ghcfg',JSON.stringify({o:$('go').value.trim(),r:$('gr').value.trim(),b:$('gb').value.trim()||'main',t:$('gt').value.trim()}))}catch(e){}$('um').textContent='✅ Settings saved';list()};
+async function G(p,method='GET',body){const c=cfg();if(!c.t||!c.o||!c.r)throw new Error('GitHub settings (username, repo, token) ఇవ్వండి');
+const u='https://api.github.com/repos/'+c.o+'/'+c.r+'/contents/'+p+(method==='GET'?'?ref='+c.b+'&_='+Date.now():'');
+const r=await fetch(u,{method,headers:{Authorization:'Bearer '+c.t,Accept:'application/vnd.github+json'},body:body&&JSON.stringify({branch:c.b,...body})});
+if(r.status===404&&method==='GET')return null;if(!r.ok)throw new Error('GitHub '+r.status+': '+((await r.json().catch(()=>({}))).message||''));return r.json()}
+const enc=s=>btoa(unescape(encodeURIComponent(s)));
+async function readIdx(){const j=await G('books/books.json');return j?{a:JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,''))))),sha:j.sha}:{a:[],sha:null}}
+const writeIdx=(a,sha,m)=>G('books/books.json','PUT',{message:m,content:enc(JSON.stringify(a,null,1)),...(sha?{sha}:{})});
+async function list(){const u=$('ul');u.innerHTML='';try{const {a}=await readIdx();if(!a.length)u.innerHTML='<p style="color:var(--mut)">ఇంకా ఏవీ లేవు.</p>';
+a.forEach(b=>{const r=document.createElement('div');r.className='row';const t=document.createElement('span');t.textContent=b.title+' ('+b.pages.length+' pages)';const d=document.createElement('button');d.className='sm';d.textContent='Delete';
+d.onclick=async()=>{if(!confirm('Delete "'+b.title+'"?'))return;d.disabled=true;try{const fs=await G('books/'+b.id)||[];for(const f of fs)await G(f.path,'DELETE',{message:'Delete page',sha:f.sha});
+const x=await readIdx();await writeIdx(x.a.filter(k=>k.id!==b.id),x.sha,'Remove book');$('um').textContent='🗑️ తొలగించబడింది (సైట్ 1–2 నిమిషాల్లో అప్‌డేట్ అవుతుంది)';await load();list()}catch(e){$('um').textContent='❌ '+e.message;d.disabled=false}};r.append(t,d);u.appendChild(r)})}
+catch(e){u.innerHTML='<p style="color:var(--mut)">'+(cfg().t?e.message:'పైన GitHub settings సేవ్ చేయండి.')+'</p>'}}
+$('nu').onclick=()=>ok()?(show('u'),fill()):($('lg').hidden=false,$('lu').focus());
 $('lc').onclick=()=>$('lg').hidden=true;
 $('lo').onclick=()=>{try{sessionStorage.removeItem('adm')}catch(e){}show('h')};
 $('lb').onclick=async()=>{const good=$('lu').value.trim()===USER&&await sha($('lp').value)===HASH;if(!good){$('le').textContent='Wrong username or password';return}
-try{sessionStorage.setItem('adm','1')}catch(e){}$('le').textContent='';$('lp').value='';$('lg').hidden=true;show('u')};
+try{sessionStorage.setItem('adm','1')}catch(e){}$('le').textContent='';$('lp').value='';$('lg').hidden=true;show('u');fill()};
 $('lp').addEventListener('keydown',e=>{if(e.key==='Enter')$('lb').click()});
 $('ub').onclick=async()=>{const f=$('uf').files[0],t=$('ut').value.trim(),m=$('um');
 if(!t||!f){m.textContent='పేరు, PDF రెండూ ఇవ్వండి.';return}
-$('ub').disabled=true;try{pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-const pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise,pages=[];let r=596/842;
+$('ub').disabled=true;try{if(!cfg().t)throw new Error('ముందు GitHub settings సేవ్ చేయండి');
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise,imgs=[];let r=596/842;
 for(let i=1;i<=pdf.numPages;i++){m.textContent='Converting page '+i+' / '+pdf.numPages+' …';const p=await pdf.getPage(i),v0=p.getViewport({scale:1});if(i===1)r=v0.width/v0.height;
-const v=p.getViewport({scale:1400/v0.width}),c=document.createElement('canvas');c.width=v.width;c.height=v.height;await p.render({canvasContext:c.getContext('2d'),viewport:v}).promise;pages.push(c.toDataURL('image/jpeg',.82))}
-await tx('readwrite',o=>o.put({id:Date.now(),title:t,sub:$('us').value.trim(),pages,r}));
-m.textContent='✅ సిద్ధం! హోమ్ పేజీలో పుస్తకం కనిపిస్తుంది.';$('ut').value=$('us').value=$('uf').value='';await load();list()}
-catch(e){m.textContent='❌ Error: '+(e&&e.message||e)}$('ub').disabled=false};
+const v=p.getViewport({scale:1400/v0.width}),c=document.createElement('canvas');c.width=v.width;c.height=v.height;await p.render({canvasContext:c.getContext('2d'),viewport:v}).promise;imgs.push(c.toDataURL('image/jpeg',.82))}
+const id=Date.now(),paths=[];
+for(let i=0;i<imgs.length;i++){m.textContent='GitHub కి పంపుతోంది: page '+(i+1)+' / '+imgs.length+' …';const path='books/'+id+'/page-'+String(i+1).padStart(2,'0')+'.jpg';await G(path,'PUT',{message:'Add '+t+' page '+(i+1),content:imgs[i].split(',')[1]});paths.push(path)}
+const x=await readIdx();x.a.push({id,title:t,sub:$('us').value.trim(),r,pages:paths});await writeIdx(x.a,x.sha,'Add book: '+t);
+m.textContent='✅ GitHub లో సేవ్ అయింది! సైట్ అందరికీ 1–2 నిమిషాల్లో కనిపిస్తుంది.';$('ut').value=$('us').value=$('uf').value='';
+await load();BOOKS.forEach(b=>{if(b.id===id)b.pages=imgs});draw();list()}
+catch(e){m.textContent='❌ '+(e&&e.message||e)}$('ub').disabled=false};
 load();
 </script></body></html>
