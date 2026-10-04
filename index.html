@@ -70,11 +70,11 @@ h2{font-size:22px;letter-spacing:-.5px}
 .gh{background:none;border:1px solid var(--line);color:var(--fg);border-radius:99px;padding:10px 20px;cursor:pointer;font-size:16px}
 </style></head><body>
 <nav><div class="logo">నా <span>కథలు</span></div><div class="links"><button class="nl on" id="nh">పుస్తకాలు</button><button class="nl" id="na">రచయిత</button><button class="nl" id="nu">అప్‌లోడ్</button></div><input id="q" placeholder="Search books…" aria-label="Search"></nav>
-<div id="homeView"><div class="hero"><div><span class="tag">Featured read</span><h1 id="ht"></h1><p id="hs"></p><button class="btn" id="hb">Read now →</button></div><img id="hi" alt=""></div>
+<div id="homeView"><div class="hero"><div><span class="tag" id="htag">Featured read</span><h1 id="ht"></h1><p id="hs"></p><button class="btn" id="hb">Read now →</button></div><img id="hi" alt=""></div>
 <section><h2>Library</h2><div class="grid" id="grid"></div></section>
 </div>
-<div id="authorView" hidden><section class="author" id="author" style="padding-top:40px"><div class="acard"><div class="sg"><img src="assets/signature.png" alt="సందీప్ సంతకం"></div>
-<div><span class="tag">రచయిత</span>
+<div id="authorView" hidden><section class="author" id="author" style="padding-top:40px"><div class="acard"><div class="sg"><img src="assets/signature.png" alt="సందీప్ సంతకం"><small>— రచయిత సంతకం —</small></div>
+<div><span class="tag">రచయిత</span><h2>సందీప్</h2>
 <p>కొందరు కథల కోసం ఎక్కడెక్కడికో వెళ్తారు. సందీప్ మాత్రం కథలను తన ఇంటి గడప దగ్గరే కనుగొన్నాడు — తెల్లవారుజామున వేసే ముగ్గులో, వేపచెట్టు నీడలో, కాఫీ కప్పు కోసం జరిగే చిన్న చిన్న గొడవల్లో.</p>
 <p>ఆయన కలం గంభీరమైన మాటలు చెప్పదు. అమ్మమ్మ గొంతులా మెత్తగా, తాతయ్య నవ్వులా నిష్కపటంగా మాట్లాడుతుంది. జీవితంలోని అతి పెద్ద కథలన్నీ అతి చిన్న క్షణాల్లోనే దాగి ఉంటాయని ఆయనకు తెలుసు.</p>
 <p>పల్లెటూరి మట్టివాసన, పాత పెంకుటిల్లు, ఒకరి చేతిలో ఒకరి చేయి — ఇవే ఆయన కథల ప్రాణం. సందీప్ రాసేది కేవలం కథలు కాదు; మనం మర్చిపోతున్న మనసారా నవ్వులను, పాత జ్ఞాపకాలను మళ్ళీ మన చేతిలో పెట్టే ఆప్యాయత.</p></div></div><button class="btn" id="bk2" style="display:block;margin:28px auto 0">← పుస్తకాల వద్దకు</button></section></div>
@@ -97,9 +97,8 @@ h2{font-size:22px;letter-spacing:-.5px}
 // To add a book: copy its page images into assets/pages/ and add an entry here.
 const BOOKS=[{"title": "\u0c2e\u0c28 \u0c07\u0c02\u0c1f\u0c3f \u0c17\u0c21\u0c2a", "sub": "\u0c12\u0c15 \u0c1a\u0c3f\u0c28\u0c4d\u0c28 \u0c2a\u0c32\u0c4d\u0c32\u0c46\u0c1f\u0c42\u0c30\u0c41 \u0c2a\u0c4d\u0c30\u0c47\u0c2e\u0c15\u0c25", "pages": ["assets/pages/page-01.jpg", "assets/pages/page-02.jpg", "assets/pages/page-03.jpg", "assets/pages/page-04.jpg", "assets/pages/page-05.jpg", "assets/pages/page-06.jpg", "assets/pages/page-07.jpg", "assets/pages/page-08.jpg", "assets/pages/page-09.jpg", "assets/pages/page-10.jpg", "assets/pages/page-11.jpg", "assets/pages/page-12.jpg"]}];
 const $=id=>document.getElementById(id);let pf=null,cur=null;
-$('ht').textContent=BOOKS[0].title;$('hs').textContent=BOOKS[0].sub+' — tap to read it as a page-turning flipbook.';$('hi').src=BOOKS[0].pages[0];
-$('hb').onclick=$('hi').onclick=()=>openBook(0);
-function draw(f=''){const g=$('grid');g.innerHTML='';BOOKS.forEach((b,i)=>{if(!(b.title+b.sub).toLowerCase().includes(f))return;const e=document.createElement('button');e.className='book';e.innerHTML='<img alt=""><b></b><small></small>';
+function hero(){const i=BOOKS.length-1,b=BOOKS[i];$('ht').textContent=b.title;$('hs').textContent=(b.sub?b.sub+' — ':'')+'tap to read it as a page-turning flipbook.';$('hi').src=b.pages[0];$('hi').alt=b.title;$('htag').textContent=i>0?'కొత్త పుస్తకం · New':'Featured read';$('hb').onclick=$('hi').onclick=()=>openBook(i)}
+function draw(f=''){hero();const g=$('grid');g.innerHTML='';BOOKS.forEach((b,i)=>{if(!(b.title+b.sub).toLowerCase().includes(f))return;const e=document.createElement('button');e.className='book';e.innerHTML='<img alt=""><b></b><small></small>';
 const im=e.querySelector('img');im.src=b.pages[0];im.alt=b.title;e.querySelector('b').textContent=b.title;e.querySelector('small').textContent=b.sub;e.onclick=()=>openBook(i);g.appendChild(e)});
 if(!f){const p=document.createElement('div');p.className='ph';p.textContent='+ More books coming soon';g.appendChild(p)}}
 draw();$('q').oninput=e=>draw(e.target.value.trim().toLowerCase());
@@ -131,7 +130,10 @@ const USER='admin',HASH='ca0937f4826e30f54fa213fedff79d06169df428be0fa46cae12a3a
 const ok=()=>{try{return sessionStorage.getItem('adm')==='1'}catch(e){return false}};
 const sha=async t=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode('naa-kathalu|'+t)))].map(x=>x.toString(16).padStart(2,'0')).join('');
 const BASE=BOOKS.length;
-async function load(){try{const r=await fetch('books/books.json?'+Date.now());if(r.ok){const a=await r.json();BOOKS.splice(BASE);a.forEach(b=>BOOKS.push(b))}}catch(e){}draw()}
+const RAW='https://raw.githubusercontent.com/sandeepsrisiva123/naakathalu/main/';
+async function load(){let a=null;
+for(const u of [RAW+'books/books.json?t='+Date.now(),'books/books.json?t='+Date.now()]){try{const r=await fetch(u);if(r.ok){a=await r.json();break}}catch(e){}}
+if(a){BOOKS.splice(BASE);a.forEach(b=>BOOKS.push({...b,pages:b.pages.map(p=>/^(https?:|data:)/.test(p)?p:RAW+p)}))}draw()}
 const cfg=()=>{try{return JSON.parse(localStorage.getItem('ghcfg')||'{}')}catch(e){return{}}};
 function fill(){const c=cfg(),h=location.hostname,p=location.pathname.split('/')[1];
 $('go').value=c.o||'sandeepsrisiva123';$('gr').value=c.r||'naakathalu';$('gb').value=c.b||'main';$('gt').value=c.t||'';
@@ -147,7 +149,7 @@ const writeIdx=(a,sha,m)=>G('books/books.json','PUT',{message:m,content:enc(JSON
 async function list(){const u=$('ul');u.innerHTML='';try{const {a}=await readIdx();if(!a.length)u.innerHTML='<p style="color:var(--mut)">ఇంకా ఏవీ లేవు.</p>';
 a.forEach(b=>{const r=document.createElement('div');r.className='row';const t=document.createElement('span');t.textContent=b.title+' ('+b.pages.length+' pages)';const d=document.createElement('button');d.className='sm';d.textContent='Delete';
 d.onclick=async()=>{if(!confirm('Delete "'+b.title+'"?'))return;d.disabled=true;try{const fs=await G('books/'+b.id)||[];for(const f of fs)await G(f.path,'DELETE',{message:'Delete page',sha:f.sha});
-const x=await readIdx();await writeIdx(x.a.filter(k=>k.id!==b.id),x.sha,'Remove book');$('um').textContent='🗑️ తొలగించబడింది (సైట్ 1–2 నిమిషాల్లో అప్‌డేట్ అవుతుంది)';await load();list()}catch(e){$('um').textContent='❌ '+e.message;d.disabled=false}};r.append(t,d);u.appendChild(r)})}
+const x=await readIdx();await writeIdx(x.a.filter(k=>k.id!==b.id),x.sha,'Remove book');$('um').textContent='🗑️ తొలగించబడింది (సైట్ 1–2 నిమిషాల్లో అప్‌డేట్ అవుతుంది)';{const i=BOOKS.findIndex(k=>k.id===b.id);if(i>=BASE)BOOKS.splice(i,1);draw();list()}}catch(e){$('um').textContent='❌ '+e.message;d.disabled=false}};r.append(t,d);u.appendChild(r)})}
 catch(e){u.innerHTML='<p style="color:var(--mut)">'+(cfg().t?e.message:'పైన GitHub settings సేవ్ చేయండి.')+'</p>'}}
 $('nu').onclick=()=>ok()?(show('u'),fill()):($('lg').hidden=false,$('lu').focus());
 $('lc').onclick=()=>$('lg').hidden=true;
@@ -166,7 +168,7 @@ const id=Date.now(),paths=[];
 for(let i=0;i<imgs.length;i++){m.textContent='GitHub కి పంపుతోంది: page '+(i+1)+' / '+imgs.length+' …';const path='books/'+id+'/page-'+String(i+1).padStart(2,'0')+'.jpg';await G(path,'PUT',{message:'Add '+t+' page '+(i+1),content:imgs[i].split(',')[1]});paths.push(path)}
 const x=await readIdx();x.a.push({id,title:t,sub:$('us').value.trim(),r,pages:paths});await writeIdx(x.a,x.sha,'Add book: '+t);
 m.textContent='✅ GitHub లో సేవ్ అయింది! సైట్ అందరికీ 1–2 నిమిషాల్లో కనిపిస్తుంది.';$('ut').value=$('us').value=$('uf').value='';
-await load();BOOKS.forEach(b=>{if(b.id===id)b.pages=imgs});draw();list()}
+{const nb=x.a[x.a.length-1];BOOKS.push({...nb,pages:imgs});draw();list()}}
 catch(e){m.textContent='❌ '+(e&&e.message||e)}$('ub').disabled=false};
 load();
 </script></body></html>
