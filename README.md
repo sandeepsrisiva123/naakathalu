@@ -1,24 +1,36 @@
-# నా కథలు – Flipbook Library
+# నా కథలు – Flipbook Library (GitHub-stored uploads)
 
-A static website that shows books as page-turning flipbooks (Telugu story "మన ఇంటి గడప").
+Static website (GitHub Pages). Books are shown as page-turning flipbooks.
+The admin can upload a PDF in the browser; it is converted to page images and **committed into this repo**,
+so every visitor sees it.
 
-## Files
-- `index.html` – the whole website (HTML, CSS, JavaScript)
-- `assets/pages/` – the book pages as images
-- `assets/signature.png` – author's signature
+## Project structure
+```
+index.html            whole site (HTML + CSS + JS)
+books/books.json      list of books shown on the site (edited automatically by uploads)
+books/<id>/page-NN.jpg  pages of each uploaded book (added automatically)
+assets/pages/         pages of the first built-in book
+assets/signature.png  author signature
+```
 
-## Run / publish
-Open `index.html` in a browser, or publish free with **GitHub Pages**:
-Settings → Pages → Branch: `main` / root → Save.
+## 1. Publish
+Upload all files to a **public** GitHub repo → Settings → Pages → Branch `main` / root → Save.
+Site: `https://sandeepsrisiva123.github.io/naakathalu/`
 
-## Add another book
-1. Convert the PDF to images: `pdftoppm -jpeg -r 170 book.pdf assets/pages2/page`
-2. Add a new entry to the `BOOKS` list in `index.html` (title, sub, pages).
+## 2. Create an access token (one time)
+GitHub → Settings → Developer settings → Personal access tokens → **Fine-grained tokens** → Generate.
+- Repository access: **Only select repositories** → this repo
+- Permissions → Repository permissions → **Contents: Read and write**
+- Set an expiry, copy the token (`github_pat_…`). Never put it in the code.
 
-Flip effect: [StPageFlip](https://github.com/Nodlik/StPageFlip) loaded from jsDelivr. Fonts: NTR and Anek Telugu (Google Fonts).
+## 3. Upload a book
+Open the site → **అప్‌లోడ్** → login → open "GitHub settings", enter username, repo, branch, token → Save
+→ choose PDF → upload. After 1–2 minutes (Pages rebuild) all visitors see it.
 
-## Admin upload (PDF → flipbook)
-Click **అప్‌లోడ్** in the menu, log in, choose a PDF, press convert.
-- Username: `admin`. Password is stored only as a SHA-256 hash (`HASH` near the end of `index.html`).
-- Change password: `python3 -c "import hashlib;print(hashlib.sha256(b'naa-kathalu|NEWPASSWORD').hexdigest())"` and paste the result into `HASH`.
-- Note: login and storage run in the browser only. Uploaded books are saved in that browser (IndexedDB) and are not visible to other visitors. A real shared upload needs a backend (e.g. Firebase/Supabase).
+## Login / password
+Username `admin`. Password is stored as a SHA-256 hash (`HASH` near the end of `index.html`).
+Change: `python3 -c "import hashlib;print(hashlib.sha256(b'naa-kathalu|NEWPASSWORD').hexdigest())"`
+Real protection is the GitHub token: without it nobody can write to the repo. The token is kept only in
+your browser (localStorage) on the device you entered it.
+
+Flip effect: StPageFlip (jsDelivr). PDF conversion: PDF.js (cdnjs). Fonts: NTR, Anek Telugu.
